@@ -1,0 +1,40 @@
+# ===== Nhạy cảm: KHÔNG commit cookie / phiên đăng nhập =====
+cookies/
+*.cookies
+cookie_str.txt
+
+# ===== File media / dữ liệu người dùng =====
+video.mp4
+videos/
+*.mp4
+*.mov
+*.mkv
+*.webm
+thumbnail.*
+
+# ===== Python =====
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+build/
+dist/
+*.spec
+
+# ===== Node (sidecar bgtoken-server) =====
+node_modules/
+bgtoken-server/_prog_*.json
+
+# ===== Backup / tạm =====
+*.bak
+*.tmp
+*.log
+
+# ===== IDE / máy cá nhân =====
+.claude/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

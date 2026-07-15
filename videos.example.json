@@ -1,0 +1,25 @@
+[
+  {
+    "file": "video1.mp4",
+    "title": "My First Video",
+    "description": "Uploaded via YouTube Mass Uploader",
+    "privacy": "PRIVATE",
+    "tags": ["test", "upload"],
+    "is_short": false
+  },
+  {
+    "file": "short1.mp4",
+    "title": "My First Short #shorts",
+    "description": "A short video",
+    "privacy": "PRIVATE",
+    "tags": ["shorts"],
+    "is_short": true
+  },
+  {
+    "file": "video2.mp4",
+    "title": "Video for Specific Account",
+    "description": "",
+    "privacy": "UNLISTED",
+    "account": "account_002"
+  }
+]
