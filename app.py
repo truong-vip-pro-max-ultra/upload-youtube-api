@@ -42,6 +42,9 @@ MFK_OPTIONS = [
     ("Dành cho trẻ em", True),
 ]
 
+# YouTube gioi han tieu de toi da 100 ky tu
+MAX_TITLE_LEN = 100
+
 # Role luu du lieu rieng tung dong (tren item cot FILE)
 ROLE_TARGET = Qt.UserRole + 3      # key "accId|pageId" cua kenh
 ROLE_VIDEOS = Qt.UserRole + 4      # list[{path,title,desc,privacy,mfk}] gan cho kenh
@@ -434,9 +437,15 @@ class VideoDetailDialog(QDialog):
 
         lb1 = QLabel("Tiêu đề"); lb1.setObjectName("field"); lay.addWidget(lb1)
         self.title_edit = QLineEdit(title); self.title_edit.setMinimumHeight(48)
+        self.title_edit.setMaxLength(MAX_TITLE_LEN)
         f = self.title_edit.font(); f.setPointSize(13); self.title_edit.setFont(f)
         self.title_edit.setPlaceholderText("Tiêu đề video...")
         lay.addWidget(self.title_edit)
+        self.title_count = QLabel(); self.title_count.setObjectName("hint")
+        self.title_count.setAlignment(Qt.AlignRight)
+        self.title_edit.textChanged.connect(self._update_title_count)
+        self._update_title_count(self.title_edit.text())
+        lay.addWidget(self.title_count)
 
         lb2 = QLabel("Mô tả"); lb2.setObjectName("field"); lay.addWidget(lb2)
         self.desc_edit = QPlainTextEdit(description)
@@ -451,8 +460,20 @@ class VideoDetailDialog(QDialog):
         btns.accepted.connect(self._ok); btns.rejected.connect(self.reject)
         lay.addWidget(btns)
 
+    def _update_title_count(self, text):
+        n = len(text)
+        self.title_count.setText(f"{n}/{MAX_TITLE_LEN}")
+        self.title_count.setStyleSheet(
+            "color:#e5484d;" if n >= MAX_TITLE_LEN else "")
+
     def _ok(self):
-        self.result = {"title": self.title_edit.text().strip(),
+        title = self.title_edit.text().strip()
+        if len(title) > MAX_TITLE_LEN:
+            QMessageBox.warning(self, "Tiêu đề quá dài",
+                                f"Tiêu đề tối đa {MAX_TITLE_LEN} ký tự "
+                                f"(hiện {len(title)}).")
+            return
+        self.result = {"title": title,
                        "desc": self.desc_edit.toPlainText().strip()}
         self.accept()
 
@@ -574,10 +595,18 @@ class ChannelVideosDialog(QDialog):
         pat = self.bulk_title.text()
         if not pat.strip():
             return
+        n_over = 0
         for n, v in enumerate(self._videos, 1):
             name = os.path.splitext(os.path.basename(v["path"]))[0]
-            v["title"] = pat.replace("{n}", str(n)).replace("{name}", name)
+            t = pat.replace("{n}", str(n)).replace("{name}", name)
+            if len(t) > MAX_TITLE_LEN:
+                n_over += 1
+            v["title"] = t
         self._render()
+        if n_over:
+            QMessageBox.warning(self, "Tiêu đề quá dài",
+                                f"{n_over} tiêu đề vượt {MAX_TITLE_LEN} ký tự. "
+                                f"Hãy sửa lại trước khi upload.")
 
     def _bulk_desc(self):
         if not self._videos:
@@ -1297,18 +1326,25 @@ class MainWindow(QMainWindow):
         if dlg.exec() != QDialog.Accepted:
             return
         pat = dlg.pattern
-        n_ch = n_vid = 0
+        n_ch = n_vid = n_over = 0
         for row in rows:
             videos = self._videos_of(row)
             if not videos:
                 continue
             for n, v in enumerate(videos, 1):
                 name = os.path.splitext(os.path.basename(v["path"]))[0]
-                v["title"] = pat.replace("{n}", str(n)).replace("{name}", name)
+                t = pat.replace("{n}", str(n)).replace("{name}", name)
+                if len(t) > MAX_TITLE_LEN:
+                    n_over += 1
+                v["title"] = t
             self._set_videos(row, videos)
             n_ch += 1; n_vid += len(videos)
         if n_vid:
             self.log(f"Đã đặt tiêu đề cho {n_vid} video ({n_ch} kênh).")
+            if n_over:
+                QMessageBox.warning(self, "Tiêu đề quá dài",
+                                    f"{n_over} tiêu đề vượt {MAX_TITLE_LEN} ký tự. "
+                                    f"Hãy sửa lại trước khi upload.")
         else:
             QMessageBox.information(self, "Chưa có video",
                                     "Các kênh đã chọn chưa có video. Hãy 'Gán video' trước.")

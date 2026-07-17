@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-07-17
+
+### Thêm mới
+- **Kiểm tra độ dài tiêu đề (tối đa 100 ký tự)** — đúng giới hạn của YouTube:
+  - Sửa 1 video: ô tiêu đề chặn gõ quá 100 ký tự, có bộ đếm `n/100` (đỏ khi chạm giới hạn), bấm **Lưu** mà vượt sẽ báo lỗi và không lưu.
+  - Đặt tiêu đề hàng loạt (`{n}`/`{name}`): **không cắt** tiêu đề — chỉ bắn cảnh báo số tiêu đề vượt 100 ký tự để tự sửa lại trước khi upload.
+
 ## 2026-07-15
 
 ### Thêm mới
